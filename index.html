@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BPTFull2 Photo System</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginBox" class="login-container">
+    <h2>🔐 เข้าสู่ระบบแอดมิน</h2>
+    <input type="password" id="passwordInput" placeholder="รหัสผ่านแอดมิน">
+    <button onclick="login()">เข้าสู่ระบบ</button>
+    <p id="loginStatus"></p>
+</div>
+
+<!-- MAIN SYSTEM -->
+<div id="mainApp" class="hidden">
+
+    <header>
+        <h1>📸 พระลึกลับแดนสยาม</h1>
+        <button onclick="logout()">ออกจากระบบ</button>
+    </header>
+
+    <div class="layout">
+
+        <!-- LEFT: CATEGORY PANEL -->
+        <aside>
+            <h2>หมวดหมู่</h2>
+            <ul id="categoryList"></ul>
+        </aside>
+
+        <!-- RIGHT: PHOTO PANEL -->
+        <main>
+            <div class="view-switch">
+                <button onclick="setView('grid')">🔲 กริด</button>
+                <button onclick="setView('list')">📄 ลิสต์</button>
+            </div>
+
+            <h2 id="sectionTitle">เลือกรายการจากซ้าย</h2>
+
+            <div id="photoContainer" class="grid"></div>
+        </main>
+
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
