@@ -3,51 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPTFull2 Photo System</title>
+    <title>BPT Gallery</title>
     <link rel="stylesheet" href="main.css">
 </head>
+
 <body>
-
-<!-- LOGIN -->
-<div id="loginBox" class="login-container">
-    <h2>🔐 เข้าสู่ระบบแอดมิน</h2>
-    <input type="password" id="passwordInput" placeholder="รหัสผ่านแอดมิน">
-    <button onclick="login()">เข้าสู่ระบบ</button>
-    <p id="loginStatus"></p>
-</div>
-
-<!-- MAIN SYSTEM -->
-<div id="mainApp" class="hidden">
-
-    <header>
-        <h1>📸 พระลึกลับแดนสยาม</h1>
-        <button onclick="logout()">ออกจากระบบ</button>
+    <header class="header">
+        <h1>📸พระลึกลับแดนสยาม</h1>
+        <a class="admin-link" href="#loginBox">เข้าสู่ระบบแอดมิน</a>
     </header>
 
-    <div class="layout">
+    <section class="content">
+        <h2>หมวดหมู่รูปภาพ</h2>
+        <div id="categoryListUser" class="grid"></div>
+    </section>
 
-        <!-- LEFT: CATEGORY PANEL -->
-        <aside>
-            <h2>หมวดหมู่</h2>
-            <ul id="categoryList"></ul>
-        </aside>
+    <!-- Popup Login -->
+    <div class="login-box" id="loginBox">
+        <h2>เข้าสู่ระบบแอดมิน</h2>
 
-        <!-- RIGHT: PHOTO PANEL -->
-        <main>
-            <div class="view-switch">
-                <button onclick="setView('grid')">🔲 กริด</button>
-                <button onclick="setView('list')">📄 ลิสต์</button>
-            </div>
+        <input type="password" id="adminPass" placeholder="รหัสผ่าน">
+        <p class="tip">เลือกไฟล์รหัส: <b>D:\BPTSecure\admin_password.txt</b></p>
+        <input type="file" id="pwdFile">
 
-            <h2 id="sectionTitle">เลือกรายการจากซ้าย</h2>
-
-            <div id="photoContainer" class="grid"></div>
-        </main>
-
+        <button onclick="loginAdmin()">เข้าสู่ระบบ</button>
+        <p id="loginStatus"></p>
     </div>
 
-</div>
-
-<script src="app.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
