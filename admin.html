@@ -1,50 +1,37 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control Panel</title>
-    <link rel="stylesheet" href="main.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📸 แอดมิน - พระเครื่องแดนสยาม</title>
+<link rel="stylesheet" href="main.css">
 </head>
+<body>
 
-<body class="admin-page">
+<header>
+  แอดมิน - พระเครื่องแดนสยาม
+  <span id="adminBadge">โหมดผู้ดูแลระบบ</span>
+</header>
 
-    <div class="admin-header">
-        <h1>📂 แผงควบคุมแอดมิน</h1>
-        <button onclick="logoutAdmin()" class="logout-btn">ออกจากระบบ</button>
-    </div>
+<div id="adminPanel">
+  <h2>จัดการหมวดหมู่</h2>
+  <input type="text" id="newCategory" placeholder="ชื่อหมวดหมู่ใหม่">
+  <button onclick="addCategory()">➕ เพิ่มหมวดหมู่</button>
+  <button onclick="deleteCategory()">🗑️ ลบหมวดหมู่</button>
+  <select id="categorySelect"></select>
 
-    <div class="admin-container">
+  <h2>จัดการรูปภาพ</h2>
+  <div id="upload-area" onclick="document.getElementById('fileInput').click()">
+    คลิกเพื่ออัปโหลดรูป
+    <input type="file" id="fileInput" accept="image/*" multiple style="display:none;">
+  </div>
+  <div id="gallery"></div>
+</div>
 
-        <!-- หมวดหมู่ -->
-        <section class="admin-section">
-            <h2>📁 จัดการหมวดหมู่</h2>
+<footer>
+  💾 ข้อมูลเก็บใน LocalStorage | พัฒนาโดยคุณฟรี
+</footer>
 
-            <div class="cat-row">
-                <input id="newCategory" type="text" placeholder="ชื่อหมวดใหม่">
-                <button onclick="addCategory()">เพิ่มหมวด</button>
-            </div>
-
-            <ul id="categoryList"></ul>
-        </section>
-
-        <!-- รูปภาพ -->
-        <section class="admin-section">
-            <h2>🖼 จัดการรูปภาพ</h2>
-
-            <select id="categorySelect"></select>
-
-            <div class="upload-box">
-                <input type="file" id="uploadImages" multiple accept="image/*">
-                <button onclick="uploadPhotos()">อัปโหลดรูป</button>
-            </div>
-
-            <div id="photoContainer" class="grid"></div>
-
-        </section>
-
-    </div>
-
-    <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
