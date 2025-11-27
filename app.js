@@ -1,201 +1,109 @@
-/* ---------------------------
-   LOGIN SYSTEM
----------------------------- */
+// โหลดข้อมูลจาก localStorage
+let data = JSON.parse(localStorage.getItem('photoVault')) || { categories:{} };
+let isAdmin = false;
 
-async function readPasswordFile(file) {
-    return new Promise((resolve, reject) => {
-        const r = new FileReader();
-        r.onload = e => resolve(e.target.result.trim());
-        r.onerror = reject;
-        r.readAsText(file);
+// อ่านรหัสแอดมินจากไฟล์ admin_password.txt
+// ในเว็บจริงต้องใช้ backend อ่านไฟล์ สำหรับตัวอย่างนี้กำหนดค่าใน JS
+let ADMIN_PASSWORD = "1234"; // แทนการอ่านไฟล์ admin_password.txt
+
+// DOM
+const gallery = document.getElementById('gallery');
+const catSelect = document.getElementById('categorySelect');
+const newCat = document.getElementById('newCategory');
+
+// แสดง gallery
+function renderGallery() {
+    gallery.innerHTML = '';
+    const cat = catSelect.value;
+    if(!cat || !data.categories[cat]) return;
+    data.categories[cat].forEach((photo,i)=>{
+        const div = document.createElement('div');
+        div.className = 'photo';
+        div.innerHTML = `<img src="${photo.src}" alt="${photo.name}">
+                         ${isAdmin?`<button class="delete-btn" onclick="deletePhoto('${cat}',${i})">×</button>`:''}`;
+        gallery.appendChild(div);
     });
 }
 
-async function loginAdmin() {
-    const pass = document.getElementById("adminPass").value;
-    const fileInput = document.getElementById("pwdFile");
-
-    if (!fileInput.files.length) {
-        document.getElementById("loginStatus").innerText = "กรุณาเลือกไฟล์รหัส";
-        return;
-    }
-
-    const raw = await readPasswordFile(fileInput.files[0]);
-    let correct = null;
-
-    if (raw.startsWith("ADMIN_PASSWORD=")) {
-        correct = raw.split("=")[1];
-    } else if (raw.startsWith("ADMIN_PASSWORD_BASE64=")) {
-        correct = atob(raw.split("=")[1]);
-    }
-
-    if (pass === correct) {
-        localStorage.setItem("isAdmin", "1");
-        location.href = "admin.html";
-    } else {
-        document.getElementById("loginStatus").innerText = "รหัสผ่านไม่ถูกต้อง";
-    }
+// เพิ่มหมวดหมู่
+function addCategory(){
+    if(!isAdmin) return alert('เฉพาะแอดมิน');
+    const name = newCat.value.trim();
+    if(!name) return alert('กรอกชื่อหมวดหมู่');
+    if(!data.categories) data.categories = {};
+    if(data.categories[name]) return alert('หมวดมีแล้ว');
+    data.categories[name] = [];
+    saveData();
+    loadCategories();
+    newCat.value='';
 }
 
-if (location.pathname.includes("admin.html")) {
-    if (localStorage.getItem("isAdmin") !== "1") {
-        alert("ต้องล็อกอินก่อน");
-        location.href = "index.html";
+// ลบหมวดหมู่
+function deleteCategory(){
+    if(!isAdmin) return alert('เฉพาะแอดมิน');
+    const name = catSelect.value;
+    if(!name) return alert('เลือกหมวดหมู่');
+    if(confirm(`ลบหมวด ${name} และรูปภาพทั้งหมด?`)){
+        delete data.categories[name];
+        saveData();
+        loadCategories();
     }
 }
 
-function logoutAdmin() {
-    localStorage.removeItem("isAdmin");
-    location.href = "index.html";
-}
-
-/* ---------------------------
-   CATEGORY CRUD
----------------------------- */
-
-function getCategories() {
-    return JSON.parse(localStorage.getItem("categories") || "[]");
-}
-
-function saveCategories(list) {
-    localStorage.setItem("categories", JSON.stringify(list));
-}
-
-function addCategory() {
-    const name = document.getElementById("newCategory").value.trim();
-    if (!name) return;
-
-    const cats = getCategories();
-    if (cats.includes(name)) {
-        alert("มีหมวดนี้แล้ว");
-        return;
+// ลบรูปภาพ
+function deletePhoto(cat,index){
+    if(!isAdmin) return;
+    if(confirm('ลบรูปภาพ?')){
+        data.categories[cat].splice(index,1);
+        saveData();
+        renderGallery();
     }
-
-    cats.push(name);
-    saveCategories(cats);
-    loadCategoryList();
-    loadCategorySelect();
 }
 
-function deleteCategory(name) {
-    if (!confirm("ลบหมวดนี้?")) return;
-
-    const cats = getCategories().filter(c => c !== name);
-    saveCategories(cats);
-
-    localStorage.removeItem("photos_" + name);
-
-    loadCategoryList();
-    loadCategorySelect();
-}
-
-function loadCategoryList() {
-    if (!document.getElementById("categoryList")) return;
-
-    const cats = getCategories();
-    const ul = document.getElementById("categoryList");
-    ul.innerHTML = "";
-
-    cats.forEach(cat => {
-        ul.innerHTML += `
-            <li>
-                ${cat}
-                <button onclick="deleteCategory('${cat}')">ลบ</button>
-            </li>
-        `;
+// โหลดหมวดหมู่
+function loadCategories(){
+    catSelect.innerHTML='';
+    const keys = Object.keys(data.categories);
+    keys.forEach(k=>{
+        const opt = document.createElement('option');
+        opt.value=k; opt.textContent=k;
+        catSelect.appendChild(opt);
     });
+    renderGallery();
 }
 
-/* ---------------------------
-   PHOTO CRUD
----------------------------- */
-
-function getPhotos(cat) {
-    return JSON.parse(localStorage.getItem("photos_" + cat) || "[]");
-}
-
-function savePhotos(cat, arr) {
-    localStorage.setItem("photos_" + cat, JSON.stringify(arr));
-}
-
-function uploadPhotos() {
-    const cat = document.getElementById("categorySelect").value;
-    const files = document.getElementById("uploadImages").files;
-
-    if (!files.length) {
-        alert("เลือกรูปก่อน");
-        return;
-    }
-
-    const tasks = [];
-
-    for (let file of files) {
-        const r = new FileReader();
-        const p = new Promise(resolve => {
-            r.onload = e => resolve(e.target.result);
-        });
-        r.readAsDataURL(file);
-        tasks.push(p);
-    }
-
-    Promise.all(tasks).then(results => {
-        const arr = getPhotos(cat);
-        results.forEach(img => arr.push(img));
-        savePhotos(cat, arr);
-        loadPhotos();
+// อัปโหลดรูป
+document.getElementById('fileInput')?.addEventListener('change',function(e){
+    if(!isAdmin) return;
+    const cat = catSelect.value;
+    if(!cat) return alert('เลือกหมวดก่อนอัปโหลด');
+    const files = Array.from(e.target.files);
+    files.forEach(file=>{
+        const reader = new FileReader();
+        reader.onload = function(ev){
+            data.categories[cat].push({name:file.name, src:ev.target.result});
+            saveData();
+            renderGallery();
+        }
+        reader.readAsDataURL(file);
     });
+});
+
+// บันทึก localStorage
+function saveData(){ localStorage.setItem('photoVault',JSON.stringify(data)); }
+
+// เริ่มต้น
+function adminLogin(){
+    const pass = prompt('รหัสแอดมิน:');
+    if(pass===ADMIN_PASSWORD){
+        isAdmin=true;
+        document.getElementById('adminBadge')?.style.display='inline-block';
+        loadCategories();
+        alert('เข้าสู่ระบบแอดมินสำเร็จ');
+    } else alert('รหัสไม่ถูกต้อง');
 }
 
-function deletePhoto(cat, index) {
-    const arr = getPhotos(cat);
-    arr.splice(index, 1);
-    savePhotos(cat, arr);
-    loadPhotos();
-}
+// ถ้าเป็น admin.html ให้ล็อกอิน
+if(location.pathname.includes('admin.html')) adminLogin();
 
-function loadPhotos() {
-    if (!document.getElementById("photoContainer")) return;
-
-    const cat = document.getElementById("categorySelect").value;
-    const arr = getPhotos(cat);
-
-    const box = document.getElementById("photoContainer");
-    box.innerHTML = "";
-
-    arr.forEach((img, i) => {
-        box.innerHTML += `
-            <div class="photo-card">
-                <img src="${img}">
-                <button onclick="deletePhoto('${cat}', ${i})">ลบรูป</button>
-            </div>
-        `;
-    });
-}
-
-/* ---------------------------
-   USER VIEW (INDEX.HTML)
----------------------------- */
-
-function loadUserCategories() {
-    const box = document.getElementById("categoryListUser");
-    if (!box) return;
-
-    const cats = getCategories();
-    box.innerHTML = "";
-
-    cats.forEach(cat => {
-        box.innerHTML += `
-            <div class="category-card">${cat}</div>
-        `;
-    });
-}
-
-/* ---------------------------
-   INITIALIZER
----------------------------- */
-
-window.onload = () => {
-    loadCategoryList();
-    loadCategorySelect();
-    loadUserCategories();
-};
+catSelect?.addEventListener('change', renderGallery);
