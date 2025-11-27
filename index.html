@@ -1,35 +1,26 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BPT Gallery</title>
-    <link rel="stylesheet" href="main.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📸 พระเครื่องแดนสยาม</title>
+<link rel="stylesheet" href="main.css">
 </head>
-
 <body>
-    <header class="header">
-        <h1>📸พระลึกลับแดนสยาม</h1>
-        <a class="admin-link" href="#loginBox">เข้าสู่ระบบแอดมิน</a>
-    </header>
 
-    <section class="content">
-        <h2>หมวดหมู่รูปภาพ</h2>
-        <div id="categoryListUser" class="grid"></div>
-    </section>
+<header>
+  พระเครื่องแดนสยาม
+  <a href="admin.html" class="admin-link">🔐 เข้าสู่ระบบแอดมิน</a>
+</header>
 
-    <!-- Popup Login -->
-    <div class="login-box" id="loginBox">
-        <h2>เข้าสู่ระบบแอดมิน</h2>
+<main>
+  <div id="gallery"></div>
+</main>
 
-        <input type="password" id="adminPass" placeholder="รหัสผ่าน">
-        <p class="tip">เลือกไฟล์รหัส: <b>D:\BPTSecure\admin_password.txt</b></p>
-        <input type="file" id="pwdFile">
+<footer>
+  💾 เก็บข้อมูลถาวรในเครื่อง | ผู้ใช้ทั่วไปสามารถดูรูปภาพได้เท่านั้น
+</footer>
 
-        <button onclick="loginAdmin()">เข้าสู่ระบบ</button>
-        <p id="loginStatus"></p>
-    </div>
-
-    <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
