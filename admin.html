@@ -2,25 +2,42 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>Admin Panel</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔧 Admin Panel - พระเครื่องแดนสยาม</title>
 <link rel="stylesheet" href="main.css">
 </head>
 <body>
-<header>🔐 Admin Panel</header>
-<div>
-    รหัสแอดมิน: <input type="password" id="adminPass">
-    <button onclick="login(document.getElementById('adminPass').value)">เข้าสู่ระบบ</button>
+<header>โหมดผู้ดูแลระบบ</header>
+
+<div id="loginSection">
+  <h2>เข้าสู่ระบบ Admin</h2>
+  <input type="password" id="adminPass" placeholder="รหัสผ่านแอดมิน">
+  <button onclick="loginAdmin()">เข้าสู่ระบบ</button>
 </div>
 
-<div class="admin-only">
-    <button onclick="addCategory()">เพิ่มหมวดหมู่</button>
-    <button onclick="deleteCategory()">ลบหมวดหมู่</button>
+<div id="adminPanel" style="display:none;">
+  <h2>จัดการหมวดหมู่และรูปภาพ</h2>
+  
+  <!-- CRUD หมวดหมู่ -->
+  <div>
+    <input type="text" id="newCategory" placeholder="เพิ่มหมวดหมู่ใหม่">
+    <button onclick="addCategory()">➕ เพิ่มหมวด</button>
     <select id="categorySelect"></select>
-    <input type="file" id="fileInput">
-    <button onclick="upload()">อัปโหลด</button>
-    <div id="adminGallery"></div>
+    <button onclick="deleteCategory()">🗑️ ลบหมวด</button>
+  </div>
+
+  <!-- CRUD รูปภาพ -->
+  <div>
+    <input type="file" id="fileInput" accept="image/*" multiple>
+    <button onclick="uploadImages()">📤 อัปโหลดรูป</button>
+  </div>
+
+  <div id="gallery"></div>
 </div>
 
 <script src="app.js"></script>
+<script>
+  initAdmin(); // เตรียมระบบ admin
+</script>
 </body>
 </html>
