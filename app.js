@@ -1,109 +1,113 @@
-// โหลดข้อมูลจาก localStorage
-let data = JSON.parse(localStorage.getItem('photoVault')) || { categories:{} };
+// ----------------- Settings -----------------
+const ADMIN_PASSWORD_FILE = 'admin_password.txt';
 let isAdmin = false;
+let data = {categories:{}}; // {categoryName:[{name,url}]}
 
-// อ่านรหัสแอดมินจากไฟล์ admin_password.txt
-// ในเว็บจริงต้องใช้ backend อ่านไฟล์ สำหรับตัวอย่างนี้กำหนดค่าใน JS
-let ADMIN_PASSWORD = "1234"; // แทนการอ่านไฟล์ admin_password.txt
-
-// DOM
-const gallery = document.getElementById('gallery');
+// ----------------- DOM -----------------
 const catSelect = document.getElementById('categorySelect');
-const newCat = document.getElementById('newCategory');
+const gallery = document.getElementById('gallery');
+const adminGallery = document.getElementById('adminGallery');
 
-// แสดง gallery
-function renderGallery() {
-    gallery.innerHTML = '';
-    const cat = catSelect.value;
-    if(!cat || !data.categories[cat]) return;
-    data.categories[cat].forEach((photo,i)=>{
-        const div = document.createElement('div');
-        div.className = 'photo';
-        div.innerHTML = `<img src="${photo.src}" alt="${photo.name}">
-                         ${isAdmin?`<button class="delete-btn" onclick="deletePhoto('${cat}',${i})">×</button>`:''}`;
-        gallery.appendChild(div);
-    });
+// ----------------- Helpers -----------------
+function showToast(msg,isError=false){
+    const t = document.createElement('div');
+    t.style.position='fixed'; t.style.bottom='20px'; t.style.left='50%';
+    t.style.transform='translateX(-50%)'; t.style.padding='10px 20px';
+    t.style.background=isError?'#ff5555':'#22ff77'; t.style.color='#000';
+    t.style.borderRadius='10px'; t.style.zIndex='9999'; t.textContent=msg;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(),3000);
 }
 
-// เพิ่มหมวดหมู่
-function addCategory(){
-    if(!isAdmin) return alert('เฉพาะแอดมิน');
-    const name = newCat.value.trim();
-    if(!name) return alert('กรอกชื่อหมวดหมู่');
-    if(!data.categories) data.categories = {};
-    if(data.categories[name]) return alert('หมวดมีแล้ว');
-    data.categories[name] = [];
-    saveData();
-    loadCategories();
-    newCat.value='';
-}
-
-// ลบหมวดหมู่
-function deleteCategory(){
-    if(!isAdmin) return alert('เฉพาะแอดมิน');
-    const name = catSelect.value;
-    if(!name) return alert('เลือกหมวดหมู่');
-    if(confirm(`ลบหมวด ${name} และรูปภาพทั้งหมด?`)){
-        delete data.categories[name];
-        saveData();
-        loadCategories();
-    }
-}
-
-// ลบรูปภาพ
-function deletePhoto(cat,index){
-    if(!isAdmin) return;
-    if(confirm('ลบรูปภาพ?')){
-        data.categories[cat].splice(index,1);
-        saveData();
-        renderGallery();
-    }
-}
-
-// โหลดหมวดหมู่
-function loadCategories(){
+// ----------------- Load Gallery -----------------
+function loadGallery(){
     catSelect.innerHTML='';
-    const keys = Object.keys(data.categories);
-    keys.forEach(k=>{
-        const opt = document.createElement('option');
-        opt.value=k; opt.textContent=k;
-        catSelect.appendChild(opt);
+    Object.keys(data.categories).forEach(cat=>{
+        const opt = document.createElement('option'); opt.value=cat; opt.textContent=cat; catSelect.appendChild(opt);
     });
     renderGallery();
 }
 
-// อัปโหลดรูป
-document.getElementById('fileInput')?.addEventListener('change',function(e){
-    if(!isAdmin) return;
-    const cat = catSelect.value;
-    if(!cat) return alert('เลือกหมวดก่อนอัปโหลด');
-    const files = Array.from(e.target.files);
-    files.forEach(file=>{
-        const reader = new FileReader();
-        reader.onload = function(ev){
-            data.categories[cat].push({name:file.name, src:ev.target.result});
-            saveData();
-            renderGallery();
-        }
-        reader.readAsDataURL(file);
+// ----------------- Render Gallery -----------------
+function renderGallery(){
+    const category = catSelect.value;
+    if(!gallery) return;
+    gallery.innerHTML='';
+    if(!data.categories[category]) { gallery.innerHTML='<p>ยังไม่มีรูปภาพ</p>'; return; }
+    data.categories[category].forEach(p=>{
+        const div = document.createElement('div'); div.className='photo';
+        div.innerHTML=`<img src="${p.url}" alt="${p.name}"><div class="photo-name">${p.name}</div>`;
+        gallery.appendChild(div);
     });
-});
-
-// บันทึก localStorage
-function saveData(){ localStorage.setItem('photoVault',JSON.stringify(data)); }
-
-// เริ่มต้น
-function adminLogin(){
-    const pass = prompt('รหัสแอดมิน:');
-    if(pass===ADMIN_PASSWORD){
-        isAdmin=true;
-        document.getElementById('adminBadge')?.style.display='inline-block';
-        loadCategories();
-        alert('เข้าสู่ระบบแอดมินสำเร็จ');
-    } else alert('รหัสไม่ถูกต้อง');
 }
 
-// ถ้าเป็น admin.html ให้ล็อกอิน
-if(location.pathname.includes('admin.html')) adminLogin();
+// ----------------- Admin Render -----------------
+function renderAdminGallery(){
+    if(!adminGallery) return;
+    adminGallery.innerHTML='';
+    const category = catSelect.value;
+    if(!data.categories[category]) return;
+    data.categories[category].forEach((p,index)=>{
+        const div = document.createElement('div'); div.className='adminPhoto';
+        div.innerHTML=`<img src="${p.url}" alt="${p.name}"><div class="adminPhoto-name">${p.name}</div>
+        <button onclick="deletePhoto('${category}',${index})">ลบ</button>`;
+        adminGallery.appendChild(div);
+    });
+}
 
-catSelect?.addEventListener('change', renderGallery);
+// ----------------- Admin CRUD -----------------
+function addCategory(){
+    const name = prompt('ชื่อหมวดหมู่ใหม่:');
+    if(!name) return;
+    if(data.categories[name]) { showToast('หมวดนี้มีแล้ว',true); return; }
+    data.categories[name]=[];
+    loadGallery();
+    renderAdminGallery();
+}
+
+function deleteCategory(){
+    const name = catSelect.value;
+    if(!confirm(`ลบหมวด ${name}?`)) return;
+    delete data.categories[name];
+    loadGallery();
+    renderAdminGallery();
+}
+
+function upload(){
+    const file = document.getElementById('fileInput').files[0];
+    if(!file) { showToast('ยังไม่ได้เลือกไฟล์',true); return; }
+    const reader = new FileReader();
+    reader.onload = e=>{
+        const category = catSelect.value;
+        data.categories[category].push({name:file.name,url:e.target.result});
+        renderGallery();
+        renderAdminGallery();
+        showToast('อัปโหลดเรียบร้อย');
+    };
+    reader.readAsDataURL(file);
+}
+
+function deletePhoto(category,index){
+    if(!confirm('ลบรูปภาพนี้?')) return;
+    data.categories[category].splice(index,1);
+    renderGallery();
+    renderAdminGallery();
+}
+
+// ----------------- Login -----------------
+function login(pass){
+    fetch(ADMIN_PASSWORD_FILE).then(r=>r.text()).then(correct=>{
+        if(pass.trim()===correct.trim()){
+            isAdmin=true;
+            document.querySelectorAll('.admin-only').forEach(el=>el.style.display='inline-block');
+            showToast('เข้าสู่ระบบสำเร็จ');
+            renderAdminGallery();
+        } else showToast('รหัสไม่ถูกต้อง',true);
+    });
+}
+
+// ----------------- Events -----------------
+if(catSelect) catSelect.addEventListener('change',()=>{
+    renderGallery();
+    renderAdminGallery();
+});
