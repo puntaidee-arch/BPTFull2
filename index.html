@@ -7,20 +7,17 @@
 <link rel="stylesheet" href="main.css">
 </head>
 <body>
+<header>พระเครื่องแดนสยาม</header>
 
-<header>
-  พระเครื่องแดนสยาม
-  <a href="admin.html" class="admin-link">🔐 เข้าสู่ระบบแอดมิน</a>
-</header>
-
-<main>
-  <div id="gallery"></div>
-</main>
+<div id="gallery"></div>
 
 <footer>
-  💾 เก็บข้อมูลถาวรในเครื่อง | ผู้ใช้ทั่วไปสามารถดูรูปภาพได้เท่านั้น
+<p>💾 เก็บข้อมูลถาวรในเครื่อง | ผู้ชมทั่วไปสามารถดูรูปได้เท่านั้น</p>
 </footer>
 
 <script src="app.js"></script>
+<script>
+  renderGallery(false); // false = ผู้ชมทั่วไป
+</script>
 </body>
 </html>
