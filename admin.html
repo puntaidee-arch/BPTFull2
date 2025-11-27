@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control Panel</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+
+<body class="admin-page">
+
+    <div class="admin-header">
+        <h1>📂 แผงควบคุมแอดมิน</h1>
+        <button onclick="logoutAdmin()" class="logout-btn">ออกจากระบบ</button>
+    </div>
+
+    <div class="admin-container">
+
+        <!-- หมวดหมู่ -->
+        <section class="admin-section">
+            <h2>📁 จัดการหมวดหมู่</h2>
+
+            <div class="cat-row">
+                <input id="newCategory" type="text" placeholder="ชื่อหมวดใหม่">
+                <button onclick="addCategory()">เพิ่มหมวด</button>
+            </div>
+
+            <ul id="categoryList"></ul>
+        </section>
+
+        <!-- รูปภาพ -->
+        <section class="admin-section">
+            <h2>🖼 จัดการรูปภาพ</h2>
+
+            <select id="categorySelect"></select>
+
+            <div class="upload-box">
+                <input type="file" id="uploadImages" multiple accept="image/*">
+                <button onclick="uploadPhotos()">อัปโหลดรูป</button>
+            </div>
+
+            <div id="photoContainer" class="grid"></div>
+
+        </section>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
